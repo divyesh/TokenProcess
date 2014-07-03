@@ -27,6 +27,7 @@ public class GridviewAdapter extends BaseAdapter {
         return tokens.size();
     }
 
+
     @Override
     public String getItem(int position) {
         // TODO Auto-generated method stub
@@ -37,15 +38,18 @@ public class GridviewAdapter extends BaseAdapter {
         // TODO Auto-generated method stub
         return tokens.get(position).Healthcard;
     }
+
     @Override
     public long getItemId(int position) {
         // TODO Auto-generated method stub
-        return 0;
+        return Long.parseLong(tokens.get(position).Id);
     }
 
     public static class ViewHolder {
         public ImageView imgViewFlag;
         public TextView txtViewTitle;
+        public TextView txtHealthCard;
+
     }
 
     @Override
@@ -60,7 +64,8 @@ public class GridviewAdapter extends BaseAdapter {
 
             view.txtViewTitle = (TextView) convertView
                     .findViewById(R.id.tokenTxt);
-
+            view.txtHealthCard = (TextView) convertView
+                    .findViewById(R.id.healthCardTxt);
 
             convertView.setTag(view);
         } else {
@@ -68,7 +73,7 @@ public class GridviewAdapter extends BaseAdapter {
         }
 
         view.txtViewTitle.setText(tokens.get(position).Token+"");
-
+        view.txtHealthCard.setText(tokens.get(position).Healthcard);
         return convertView;
     }
 }

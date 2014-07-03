@@ -1,18 +1,18 @@
 package com.mindblots.tokenprocess;
 
-/**
- * Created by divyeshkonkani on 2014-07-03.
- */
 public class webToken {
 
-    public webToken(int token,String healthcard,boolean isProcessed)
+    public webToken(String _id, String _token,String _healthcard,String _state,String _url)
     {
-        Token=token;
-        Healthcard=healthcard;
-        IsProcessed=isProcessed;
+        Id=_id;
+        Token=_token;
+        Healthcard=_healthcard;
+        state=_state;
+        Url=_url;
     }
-    public int Token;
+    public String Id;
+    public String Token;
     public String Healthcard;
-    public boolean IsProcessed;
-
+    public String state;
+    public String Url;
 }

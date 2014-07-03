@@ -20,7 +20,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="1234567890"
+        android:text=""
         android:gravity="center"
         android:textSize="20sp"
         android:layout_below="@+id/tokenTxt"
