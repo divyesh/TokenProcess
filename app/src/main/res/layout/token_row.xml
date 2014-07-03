@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relativeLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+   >
+
+    <TextView
+        android:id="@+id/tokenTxt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_marginTop="2dp"
+        android:textSize="100sp" >
+    </TextView>
+    <TextView
+        android:id="@+id/healthCardTxt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="1234567890"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:layout_below="@+id/tokenTxt"
+        android:layout_centerHorizontal="true">
+    </TextView>
+</RelativeLayout>
