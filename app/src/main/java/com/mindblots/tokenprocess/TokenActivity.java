@@ -29,6 +29,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -38,9 +39,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -55,8 +58,6 @@ public class TokenActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token);
         LoadPendingTokens();
-
-
     }
 
     @Override
@@ -65,26 +66,13 @@ public class TokenActivity extends Activity {
         getMenuInflater().inflate(R.menu.token, menu);
         return true;
     }
-    public void postData(String id,String state) {
-        // Create a new HttpClient and Post Header
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost("http://dymo.herokuapp.com/tokens/"+id+"/"+state);
 
-        try {
 
-            // Execute HTTP Post Request
-            HttpResponse response = httpclient.execute(httppost);
 
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-        }
-    }
     public void LoadPendingTokens() {
 
         try {
-            new HttpAsyncTask().execute("http://dymo.herokuapp.com/tokens.json");
+            new GetTokenAsyncTask().execute("http://dymo.herokuapp.com/tokens.json");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -103,7 +91,7 @@ public class TokenActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-    private void OpenAlert(View view,String id, String token) {
+    private void OpenAlert(View view,final String tokenId, String token) {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TokenActivity.this);
 
@@ -116,8 +104,8 @@ public class TokenActivity extends Activity {
         alertDialogBuilder.setPositiveButton("Process",new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog,int id) {
+                new ProcessTokenAsyncTask().execute(tokenId+"","done");
 
-                postData(id+"","done");
             }
 
         });
@@ -129,7 +117,7 @@ public class TokenActivity extends Activity {
             public void onClick(DialogInterface dialog,int id) {
 
                 // cancel the alert box and put a Toast to the user
-                postData(id+"","discard");
+                //postData(id+"","discard");
                 dialog.cancel();
 
                 Toast.makeText(getApplicationContext(), "You chose a negative answer",Toast.LENGTH_LONG).show();
@@ -178,11 +166,9 @@ public class TokenActivity extends Activity {
                 result = convertInputStreamToString(inputStream);
             else
                 result = "Did not work!";
-
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
         }
-
         return result;
     }
 
@@ -198,41 +184,107 @@ public class TokenActivity extends Activity {
 
     }
 
-    public boolean isConnected(){
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
+    private class ProcessTokenAsyncTask extends AsyncTask<String, Integer, Double>{
+
+        @Override
+        protected Double doInBackground(String... params) {
+            // TODO Auto-generated method stub
+            //Toast.makeText(getApplicationContext(), params[0], Toast.LENGTH_LONG).show();
+            Log.i("OHIP Entered",params[0]);
+            final String json=postData(params[0],params[1]);
+
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    webToken w= null;
+                    try {
+                        w = toToken(json);
+                        //ohipActivity.this.tokenNum.setText(w.Token);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            });
+
+            Log.i("OHIP SENT",params[0]);
+            return null;
+        }
+
+        protected void onPostExecute(Double result){
+
+            Toast.makeText(getApplicationContext(), "Contacting Server", Toast.LENGTH_LONG).show();
+        }
+
+
+        public String  postData(String id, String state) {
+            // Create a new HttpClient and Post Header
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost("http://dymo.herokuapp.com/tokens.json");
+
+            try {
+                // Add your data
+                JSONObject data = new JSONObject();
+                data.put("id",id);
+                data.put("state",state);
+                StringEntity se = new StringEntity(data.toString());
+
+                //sets the post request as the resulting string
+                httppost.setEntity(se);
+                //sets a request header so the page receving the request
+                //will know what to do with it
+                httppost.setHeader("Accept", "application/json");
+                httppost.setHeader("Content-type", "application/json");
+
+                // Execute HTTP Post Request
+                HttpResponse response = httpclient.execute(httppost);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+                String json = reader.readLine();
+
+                return json;
+            } catch (ClientProtocolException e) {
+                Log.i("OHIP Response ERROR",e.toString());
+            } catch (IOException e) {
+                Log.i("OHIP Response ERROR",e.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        public  webToken toToken(String json) throws JSONException {
+
+            JSONObject jo =new JSONObject(json);
+            String id = jo.getString("id");
+            String token = jo.getString("no");
+            String state = jo.getString("state");
+            String hc = jo.getJSONObject("patient").getString("healthnumber");
+
+            if (!state.equals("completed")) {
+                webToken w = new webToken(id, token, hc, state, "");
+
+                return w;
+            }
+            return null;
+        }
     }
-    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+    private class GetTokenAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
 
             return GET(urls[0]);
         }
+
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(getBaseContext(), "= "+result, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getBaseContext(), "= "+result, Toast.LENGTH_LONG).show();
             //responseString=result;
             tokenList = new ArrayList<webToken>();
-            mAdapter = new GridviewAdapter(TokenActivity.this, tokenList);
 
-            gridView = (GridView) findViewById(R.id.gridView1);
-            gridView.setAdapter(mAdapter);
 
             // Implement On Item click listener
-            gridView.setOnItemClickListener(new OnItemClickListener() {
 
-                @Override
-                public void onItemClick(AdapterView<?> arg0, View v, int position,
-                                        long arg3) {
-
-                  OpenAlert(v,mAdapter.getItemId(position)+"",mAdapter.getItem(position));
-                }
-            });
             try {
 
                 JSONArray jsonArray = new JSONArray(result);
@@ -249,7 +301,20 @@ public class TokenActivity extends Activity {
                         webToken w = new webToken(id, token, hc, state, url);
                         tokenList.add(w);
                     }
-                    Log.i("TOKEN RECEIVED",hc.toString());
+                    mAdapter = new GridviewAdapter(TokenActivity.this, tokenList);
+
+                    gridView = (GridView) findViewById(R.id.gridView1);
+                    gridView.setAdapter(mAdapter);
+                    gridView.setOnItemClickListener(new OnItemClickListener() {
+
+                        @Override
+                        public void onItemClick(AdapterView<?> arg0, View v, int position,
+                                                long arg3) {
+                            String idd=mAdapter.getItemId(position)+"";
+                            OpenAlert(v,idd,mAdapter.getItem(position));
+                        }
+                    });
+                    //Log.i("TOKEN RECEIVED",hc.toString());
                 }
 
             } catch (Exception e) {
