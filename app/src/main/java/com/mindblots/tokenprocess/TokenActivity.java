@@ -105,6 +105,7 @@ public class TokenActivity extends Activity {
 
             public void onClick(DialogInterface dialog,int id) {
                 new ProcessTokenAsyncTask().execute(tokenId+"","done");
+                LoadPendingTokens();
 
             }
 
@@ -116,8 +117,8 @@ public class TokenActivity extends Activity {
 
             public void onClick(DialogInterface dialog,int id) {
 
-                // cancel the alert box and put a Toast to the user
-                //postData(id+"","discard");
+                new ProcessTokenAsyncTask().execute(tokenId+"","discard");
+                LoadPendingTokens();
                 dialog.cancel();
 
                 Toast.makeText(getApplicationContext(), "You chose a negative answer",Toast.LENGTH_LONG).show();
@@ -189,10 +190,11 @@ public class TokenActivity extends Activity {
         @Override
         protected Double doInBackground(String... params) {
             // TODO Auto-generated method stub
-            //Toast.makeText(getApplicationContext(), params[0], Toast.LENGTH_LONG).show();
-            Log.i("OHIP Entered",params[0]);
-            final String json=postData(params[0],params[1]);
 
+            Log.i("TOKEN PROCESS",params[0]);
+            final String json=postData(params[0],params[1]);
+            Log.i("TOKEN PROCESS JSON",json);
+            //Toast.makeText(getApplicationContext(),json, Toast.LENGTH_LONG).show();
             runOnUiThread(new Runnable() {
                 public void run() {
                     webToken w= null;
@@ -207,7 +209,7 @@ public class TokenActivity extends Activity {
                 }
             });
 
-            Log.i("OHIP SENT",params[0]);
+            Log.i("TOKEN PROCESS DONE",params[0]);
             return null;
         }
 
@@ -220,19 +222,11 @@ public class TokenActivity extends Activity {
         public String  postData(String id, String state) {
             // Create a new HttpClient and Post Header
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://dymo.herokuapp.com/tokens.json");
+            HttpPost httppost = new HttpPost("http://dymo.herokuapp.com/tokens/"+id+"/"+state);
 
             try {
                 // Add your data
-                JSONObject data = new JSONObject();
-                data.put("id",id);
-                data.put("state",state);
-                StringEntity se = new StringEntity(data.toString());
 
-                //sets the post request as the resulting string
-                httppost.setEntity(se);
-                //sets a request header so the page receving the request
-                //will know what to do with it
                 httppost.setHeader("Accept", "application/json");
                 httppost.setHeader("Content-type", "application/json");
 
@@ -247,8 +241,6 @@ public class TokenActivity extends Activity {
                 Log.i("OHIP Response ERROR",e.toString());
             } catch (IOException e) {
                 Log.i("OHIP Response ERROR",e.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
             return null;
         }
