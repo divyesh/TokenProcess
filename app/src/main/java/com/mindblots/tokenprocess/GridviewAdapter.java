@@ -4,6 +4,8 @@ package com.mindblots.tokenprocess;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,12 +48,17 @@ public class GridviewAdapter extends BaseAdapter {
     }
 
     public static class ViewHolder {
-        public ImageView imgViewFlag;
+        public ImageView imgViewState;
         public TextView txtViewTitle;
         public TextView txtHealthCard;
 
     }
-
+    public static String formatHealthcard(String number){
+        number  =   number.substring(0, number.length()-3) + " " + number.substring(number.length()-3, number.length());
+        number  =   number.substring(0,number.length()-7)+" "+number.substring(number.length()-7,number.length());
+        number  =   number.substring(0, number.length()-4)+" "+number.substring(number.length()-4, number.length());
+        return number;
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -66,14 +73,21 @@ public class GridviewAdapter extends BaseAdapter {
                     .findViewById(R.id.tokenTxt);
             view.txtHealthCard = (TextView) convertView
                     .findViewById(R.id.healthCardTxt);
-
+            //view.imgViewState=(ImageView)convertView.findViewById(R.id.statusImg);
             convertView.setTag(view);
         } else {
             view = (ViewHolder) convertView.getTag();
         }
 
         view.txtViewTitle.setText(tokens.get(position).Token+"");
-        view.txtHealthCard.setText(tokens.get(position).Healthcard);
+        view.txtHealthCard.setText(formatHealthcard(tokens.get(position).Healthcard));
+        if(tokens.get(position).state.equals("time_in"))
+        {
+            view.txtHealthCard.setTextColor(Color.parseColor("#f04158"));
+            //view.imgViewState.setImageResource(R.drawable.time_in);
+        }else
+            view.txtHealthCard.setTextColor(Color.parseColor("#2E570D"));
+            //view.imgViewState.setImageResource(R.drawable.registered);
         return convertView;
     }
 }

@@ -4,6 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:gravity="center"
+    android:layout_margin="20dp"
+    android:background="@drawable/token_layout"
    >
 
     <TextView
@@ -13,17 +15,23 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:layout_marginTop="2dp"
-        android:textSize="100sp" >
+        android:text="1"
+        android:textSize="100sp"
+        style="?android:attr/listSeparatorTextViewStyle"
+        >
     </TextView>
+
     <TextView
         android:id="@+id/healthCardTxt"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text=""
+        android:text="1234567890"
         android:gravity="center"
         android:textSize="20sp"
         android:layout_below="@+id/tokenTxt"
         android:layout_centerHorizontal="true">
     </TextView>
+
+
 </RelativeLayout>

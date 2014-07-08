@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -52,6 +53,7 @@ public class TokenActivity extends Activity {
     private GridviewAdapter mAdapter;
     private ArrayList<webToken> tokenList;
     private GridView gridView;
+
     private String responseString="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
